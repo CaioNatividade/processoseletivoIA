@@ -1,7 +1,9 @@
 import os
 import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers
+# Use keras via the tensorflow namespace to avoid import-from-source issues
+# (some linters/editors cannot resolve `from tensorflow.keras import ...`)
+keras = tf.keras
+layers = keras.layers
 
 # Forçar execução em CPU
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
