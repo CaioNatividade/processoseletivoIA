@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+import os
 
 # ---------------------------------------------------------------------------
 # Projeto 1 — Inferência com o Modelo Otimizado (model.tflite)
@@ -15,7 +16,6 @@ N_SAMPLES = 5
 
 
 def main():
-    import os
     script_dir = os.path.dirname(os.path.abspath(__file__))
     interpreter = tf.lite.Interpreter(model_path=os.path.join(script_dir, "model.tflite"))
     interpreter.allocate_tensors()

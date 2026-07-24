@@ -1,6 +1,11 @@
+import os
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
+
+# Forçar execução em CPU
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+tf.config.set_visible_devices([], 'GPU')
 
 # ---------------------------------------------------------------------------
 # Projeto 1 — Classificação MNIST
@@ -16,4 +21,87 @@ from tensorflow.keras import layers
 #   7. Salvar o modelo treinado como "model.h5"
 # ---------------------------------------------------------------------------
 
-# insira seu código aqui
+def main():
+    print("Carregando dataset MNIST...")
+    (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+    
+    # Normalizar para [0, 1] e expandir para (28, 28, 1)
+    x_train = x_train.astype("float32") / 255.0
+    x_test = x_test.astype("float32") / 255.0
+    x_train = np.expand_dims(x_train, axis=-1)
+    x_test = np.expand_dims(x_test, axis=-1)
+    
+    print(f"Shape dos dados: {x_train.shape}")
+    
+    # Construir a CNN com 4 blocos convolucionais
+    print("\nConstruindo modelo CNN...")
+    model = keras.Sequential([
+        # Bloco 1: Conv2D + BatchNorm + MaxPool
+        layers.Conv2D(32, kernel_size=(3, 3), activation="relu", 
+                      input_shape=(28, 28, 1), padding="same"),
+        layers.BatchNormalization(),
+        layers.MaxPooling2D(pool_size=(2, 2)),
+        
+        # Bloco 2: Conv2D + BatchNorm + MaxPool
+        layers.Conv2D(64, kernel_size=(3, 3), activation="relu", padding="same"),
+        layers.BatchNormalization(),
+        layers.MaxPooling2D(pool_size=(2, 2)),
+        
+        # Bloco 3: Conv2D + BatchNorm + MaxPool
+        layers.Conv2D(128, kernel_size=(3, 3), activation="relu", padding="same"),
+        layers.BatchNormalization(),
+        layers.MaxPooling2D(pool_size=(2, 2)),
+        
+        # Bloco 4: Conv2D + BatchNorm
+        layers.Conv2D(128, kernel_size=(3, 3), activation="relu", padding="same"),
+        layers.BatchNormalization(),
+        
+        # Flatten e Dropout
+        layers.Flatten(),
+        layers.Dropout(0.5),
+        
+        # Camada de saída
+        layers.Dense(10, activation="softmax")
+    ])
+    
+    model.compile(
+        optimizer="adam",
+        loss="sparse_categorical_crossentropy",
+        metrics=["accuracy"]
+    )
+    
+    model.summary()
+    
+    # Treinar com EarlyStopping e validação explícita
+    print("\nTreinando o modelo com CPU...")
+    early_stopping = keras.callbacks.EarlyStopping(
+        monitor="val_loss",
+        patience=3,
+        restore_best_weights=True
+    )
+    
+    history = model.fit(
+        x_train, y_train,
+        batch_size=128,
+        epochs=15,
+        validation_split=0.2,
+        callbacks=[early_stopping],
+        verbose=1
+    )
+    
+    # Avaliar no conjunto de teste
+    print("\nAvaliando no conjunto de teste...")
+    test_loss, test_accuracy = model.evaluate(x_test, y_test, verbose=0)
+    print(f"Acurácia de validação final: {test_accuracy:.4f}")
+    print(f"Perda de validação final: {test_loss:.4f}")
+    
+    # Salvar o modelo
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    model_path = os.path.join(script_dir, "model.h5")
+    model.save(model_path)
+    print(f"\nModelo salvo em: {model_path}")
+
+
+if __name__ == "__main__":
+    import numpy as np
+    main()
