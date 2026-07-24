@@ -31,7 +31,18 @@ def load_keras_model(path):
     try:
         model = tf.keras.models.load_model(path)
     except Exception as e:
-        fail(f"Não foi possível carregar {path} como modelo Keras. Erro: {e}")
+        try:
+            model = tf.keras.models.load_model(
+                path,
+                custom_objects={
+                    "GlorotUniform": tf.keras.initializers.GlorotUniform,
+                },
+            )
+        except Exception as e2:
+            fail(
+                "Não foi possível carregar {path} como modelo Keras. "
+                f"Erros:\n 1) {e}\n 2) {e2}"
+            )
     return model
 
 
