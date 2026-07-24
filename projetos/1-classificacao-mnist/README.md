@@ -132,7 +132,7 @@ Bibliotecas indiretas (incluídas por TensorFlow):
 
 **Dynamic Range Quantization** (`tf.lite.Optimize.DEFAULT`):
 
-Esta técnica reduz a precisão dos pesos do modelo de float32 para int8, mantendo ativações em float32. É aplicada automaticamente pelo TFLiteConverter ao usar `converter.optimizations = [tf.lite.Optimize.DEFAULT]`.
+Esta técnica aplica quantização dinâmica aos pesos durante a conversão para TensorFlow Lite, reduzindo significativamente o tamanho do modelo e melhorando a eficiência para execução em dispositivos com recursos limitados, mantendo boa precisão na maioria dos casos.
 
 **Benefícios**:
 
