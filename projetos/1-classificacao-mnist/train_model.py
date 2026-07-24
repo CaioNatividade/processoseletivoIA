@@ -114,7 +114,7 @@ def main():
         print(f"\nModelo salvo em: {model_path}")
     else:
         # Fallback: salvar o modelo atual
-        model.save(model_path)
+        model.save('model.h5', save_format='tf')
         print(f"\nModelo salvo em: {model_path} (fallback)")
 
 
