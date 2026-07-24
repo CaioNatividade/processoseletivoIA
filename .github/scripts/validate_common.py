@@ -25,6 +25,11 @@ def ok(message):
     print(f"✅ {message}")
 
 
+class CompatibleGlorotUniform(tf.keras.initializers.GlorotUniform):
+    def __init__(self, seed=None, input_axes=None, output_axes=None, **kwargs):
+        super().__init__(seed=seed)
+
+
 def load_keras_model(path):
     if not os.path.isfile(path):
         fail(f"Arquivo não encontrado: {path}")
@@ -35,12 +40,12 @@ def load_keras_model(path):
             model = tf.keras.models.load_model(
                 path,
                 custom_objects={
-                    "GlorotUniform": tf.keras.initializers.GlorotUniform,
+                    "GlorotUniform": CompatibleGlorotUniform,
                 },
             )
         except Exception as e2:
             fail(
-                "Não foi possível carregar {path} como modelo Keras. "
+                f"Não foi possível carregar {path} como modelo Keras. "
                 f"Erros:\n 1) {e}\n 2) {e2}"
             )
     return model
