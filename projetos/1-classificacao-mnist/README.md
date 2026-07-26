@@ -1,110 +1,17 @@
 # Projeto 1 — Classificação MNIST
 
-## 💻 O Desafio Técnico
-
-Desenvolva um **modelo de Visão Computacional** capaz de **classificar dígitos manuscritos (0-9)**, e posteriormente **otimize-o para execução em dispositivos Edge**.
-
-O foco não é apenas obter alta acurácia, mas **compreender o fluxo completo**:
-
-**treinamento → validação → salvamento → conversão → otimização**
-
-## 🎯 Conjunto de Dados
-
-Dataset **MNIST**, disponível diretamente via `tf.keras.datasets.mnist` (não é necessário download manual).
-
-## ✅ Requisitos Obrigatórios
-
-### Etapa 1 — Treinamento do Modelo (`train_model.py`)
-
-Implemente:
-
-- Carregamento do dataset MNIST via TensorFlow
-- **Split explícito treino/validação** (ex: `validation_split` ou um split manual)
-- Construção de uma CNN com:
-  - **3 a 4 blocos convolucionais** (`Conv2D` + `BatchNormalization` + `MaxPooling2D`)
-  - Camada de `Dropout` antes da saída, para regularização
-- Treinamento com **early stopping** baseado na perda de validação (`EarlyStopping`)
-- Exibição da **acurácia de validação final** no terminal
-- Salvamento do modelo treinado em formato Keras (`model.h5`)
-
-### Etapa 2 — Otimização do Modelo (`optimize_model.py`)
-
-Implemente:
-
-- Carregamento do `model.h5` treinado
-- Conversão para **TensorFlow Lite** (`model.tflite`)
-- Aplicação de uma técnica de otimização (ex: **Dynamic Range Quantization**)
-
-### Etapa 3 — Inferência com o Modelo Otimizado (`run_inference.py`)
-
-Implemente:
-
-- Carregamento especificamente do **`model.tflite`** (o artefato de edge — não
-  o `model.h5`) usando `tf.lite.Interpreter`
-- Execução de inferência em pelo menos **5 amostras** do conjunto de teste
-- Exibição no terminal, para cada amostra, da classe **predita** vs. a classe **real**
-
-> 💡 Essa etapa existe porque uma métrica agregada (accuracy) pode esconder
-> problemas que só aparecem olhando exemplos individuais. Também é o teste mais
-> próximo do uso real em produção: carregar o artefato de edge e classificar
-> uma entrada por vez.
-
-**Objetivo:** reduzir o tamanho do modelo, mantendo desempenho adequado para aplicações de Edge AI.
-
-**Exemplo de execução** (execute dentro de `projetos/1-classificacao-mnist`):
-
-```bash
-cd "c:\Users\SUPORTE\Documents\programacao\processoseletivoIA\projetos\1-classificacao-mnist"
-python run_inference.py
-```
-
-> Observação: se a pasta original `Programação` foi renomeada para `programacao`,
-> use o caminho atualizado acima para evitar problemas de compatibilidade com
-> algumas bibliotecas nativas.
-
-## 📂 Estrutura da Pasta
-
-⚠️ Não altere os nomes dos arquivos.
-
-```
-projetos/1-classificacao-mnist/
-├── train_model.py         # ✏️ Treinamento do modelo
-├── optimize_model.py      # ✏️ Conversão e otimização
-├── run_inference.py       # ✏️ Inferência de exemplo com o modelo otimizado
-├── requirements.txt       # 📄 Dependências do projeto
-├── model.h5               # 🤖 Gerado por você — deve ser commitado
-├── model.tflite           # ⚡ Gerado por você — deve ser commitado
-└── README.md               # 📝 Este arquivo (também usado como relatório)
-```
-
-## ⚠️ Restrições e Considerações de Engenharia
-
-- Entrada do modelo: imagens 28x28, 1 canal (grayscale), normalizadas em [0, 1]
-- CNN simples — evite arquiteturas muito profundas
-- Não utilize modelos pré-treinados
-- Número de épocas limitado (ex: até 15, com early stopping)
-- Treinamento apenas em CPU
-
-## ⚖️ Critérios de Avaliação
-
-- **Funcionalidade** — execução correta dos scripts e geração dos arquivos `.h5` e `.tflite`
-- **Qualidade do modelo** — acurácia de validação consistente com o esperado para o dataset
-- **Edge AI** — conversão correta para `.tflite` com técnica de otimização aplicada
-- **Documentação** — preenchimento adequado do relatório abaixo
-
----
-
 ## 📝 Relatório do Candidato
 
 👤 **Caio Juan da Natividade Santos:**
 
 ### 1️⃣ Resumo da Arquitetura do Modelo
 
-A CNN implementada possui **4 blocos convolucionais** sequenciais, cada um composto por:
+A CNN implementada possui **4 blocos convolucionais** sequenciais:
 
-- **Camada Conv2D**: com ativação ReLU (32 → 64 → 128 → 128 filtros)
-- **Batch Normalization**: para normalizar ativações e estabilizar o treinamento
-- **MaxPooling2D**: redução de dimensionalidade (2x2)
+- **Blocos 1 a 3**: `Conv2D` com ativação ReLU (32 → 64 → 128 filtros),
+  `BatchNormalization` e `MaxPooling2D` (2x2)
+- **Bloco 4**: `Conv2D` com 128 filtros e ativação ReLU, seguido de
+  `BatchNormalization`
 
 Após os blocos convolucionais:
 
@@ -112,7 +19,7 @@ Após os blocos convolucionais:
 - **Dropout (0.5)**: regularização para evitar overfitting
 - **Dense (10 neurônios)**: camada de saída com ativação softmax para classificação em 10 classes
 
-**Total de parâmetros**: 253.194 (~989 KB treináveis)
+**Total de parâmetros**: 253.194
 
 **Estratégia de validação**: Split de 20% dos dados de treinamento como conjunto de validação via `validation_split=0.2`
 
@@ -120,7 +27,7 @@ Após os blocos convolucionais:
 
 ### 2️⃣ Bibliotecas Utilizadas
 
-- **TensorFlow**: >= 2.12 (incluindo Keras para construção do modelo)
+- **TensorFlow**: 2.12 (incluindo Keras para construção do modelo)
 - **NumPy**: para manipulação de arrays
 - **Python**: 3.11
 
@@ -145,20 +52,20 @@ Esta técnica aplica quantização dinâmica aos pesos durante a conversão para
 
 **Acurácia**:
 
-- Acurácia de validação (conjunto de teste): **98.93%**
-- Acurácia de treinamento final (epoch 7): **99.53%**
-- Perda de validação final: 0.0336
+- Acurácia do modelo Keras no conjunto de teste: **99,09%**
+- Perda do modelo Keras no conjunto de teste: **0,0304**
+- Acurácia do modelo TFLite nas 10.000 amostras de teste: **99,09%**
 
 **Tamanho dos modelos**:
 | Modelo | Tamanho | Formato |
 |--------|---------|----------|
-| model.h5 | 3.97 MB | Keras (HDF5) |
-| model.tflite | 0.26 MB | TensorFlow Lite |
-| **Redução** | **91.4%** | **7x menor** |
+| model.h5 | 2,97 MiB (3.117.336 bytes) | Keras (HDF5) |
+| model.tflite | 0,25 MiB (267.176 bytes) | TensorFlow Lite |
+| **Redução** | **91,43%** | **11,67x menor** |
 
-**Tempo de treinamento**: ~350 segundos (5 minutos) em CPU
-
-**Nota**: O modelo parou na epoch 7 (de 15 máximo) graças ao Early Stopping, economizando tempo e evitando overfitting.
+Os resultados acima foram medidos diretamente nos artefatos `model.h5` e
+`model.tflite`. O treinamento foi configurado para no máximo 15 épocas, com
+interrupção antecipada após 3 épocas sem melhora da perda de validação.
 
 ### 5️⃣ Comentários Adicionais (Opcional)
 
@@ -175,13 +82,13 @@ Esta técnica aplica quantização dinâmica aos pesos durante a conversão para
 
 **Limitações**:
 
-- MNIST é um dataset simples, então 98.93% é esperado; modelos ainda mais simples (ex: 2 blocos) poderiam atingir acurácia similar
-- Treinamento em CPU é lento; com GPU seria ~100x mais rápido
+- MNIST é um dataset simples; modelos ainda mais compactos poderiam atingir acurácia similar
+- O treinamento em CPU é mais demorado do que em hardware acelerado
 - Sem data augmentation — em datasets reais, isso melhoraria robustez
 
 **Aprendizados**:
 
-- Quantização é extremamente efetiva para Edge AI, comprimindo 91.4% do tamanho
+- Quantização é efetiva para Edge AI, reduzindo o tamanho do artefato em 91,43%
 - Early Stopping é essencial para economizar tempo e evitar overfitting
 - Nomes de pastas sem acentos são importantes para compatibilidade com bibliotecas C/C++ subjacentes
 
@@ -200,6 +107,7 @@ Amostra 5: predito=4 | real=4
 **Análise**:
 
 - **100% de acurácia** nas 5 amostras testadas (5/5 corretas)
-- O modelo se comporta perfeitamente mesmo após quantização
+- O modelo classificou corretamente as cinco amostras exibidas após a quantização
 - Não houve erros ou casos interessantes — todos os dígitos foram corretamente classificados
-- Isso confirma que a técnica de Dynamic Range Quantization manteve a capacidade discriminativa do modelo
+- No conjunto de teste completo, o modelo TFLite obteve 99,09% de acurácia,
+  indicando que a quantização preservou o desempenho observado no modelo Keras
